@@ -1,0 +1,66 @@
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+import seaborn as sns
+from scipy.stats import t
+from scipy.stats import probplot
+train_set = pd.read_csv('E:/dacon_data/data_abalone/train.csv')
+test_set = pd.read_csv('E:/dacon_data/data_abalone/test.csv')
+submission = pd.read_csv('E:/dacon_data/data_abalone/sample_submission.csv')
+
+train_set = train_set.drop(index = [47, 382, 435, 847, 1078, 465], axis = 0)
+
+train_set["Shell Water"] = train_set["Whole Weight"] - (train_set["Shucked Weight"] + train_set["Shell Weight"])
+train_set["Whole Weight"] = train_set["Whole Weight"] - train_set["Shell Water"]
+train_set = train_set.drop(columns = ['Shell Water', 'id'], axis = 1)
+test_set["Shell Water"] = test_set["Whole Weight"] - (test_set["Shucked Weight"] + test_set["Shell Weight"])
+test_set["Whole Weight"] = test_set["Whole Weight"] - test_set["Shell Water"]
+test_set = test_set.drop(columns = ['Shell Water', 'id'], axis = 1)
+
+x_train = train_set.iloc[:, 0 : -1]
+y_train = train_set.iloc[:, -1]
+x_test = test_set.iloc[:, 0 : 9]
+x_train01 = x_train.copy()
+
+import sklearn
+from sklearn import *
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+
+Label_enc = sklearn.preprocessing.LabelEncoder()
+x_train01['Gender'] = Label_enc.fit(x_train01['Gender'])
+x_train['Gender'] = Label_enc.transform(x_train['Gender'])
+x_train02 = x_train.copy()
+x_test['Gender'] = Label_enc.transform(x_test['Gender'])
+scaler.fit(x_train02)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+
+x_train_train,x_train_test,y_train_train,y_test= sklearn.model_selection.train_test_split(x_train,y_train,test_size=0.3, shuffle=True, random_state=0)
+
+i = 0
+while i < 100:
+    r = -4 * np.random.rand()
+    t = -4 * np.random.rand()
+    model = sklearn.neural_network.MLPRegressor(
+    hidden_layer_sizes = (512, 256, 8, 8, 8, 8),
+    activation = 'relu',
+    solver = 'adam',
+    learning_rate_init = 10 ** (-3.902404841842882),
+    max_iter = 1024,
+    batch_size = 64,
+    alpha = 10 ** (-0.21208427149710474),
+    warm_start = False,
+    random_state = 1)
+    model.fit(x_train_train,y_train_train)
+    y_pred = model.predict(x_train_test)
+    score = model.score(x_train_test, y_test)
+    print(t)
+    print(' ')
+    print(score)
+    print('---------------------------------------')
+    i = i + 1
+
+a = model.predict(x_test)
+submission.iloc[:, 1] = a
+
