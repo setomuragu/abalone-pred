@@ -8,6 +8,3 @@
 scale을 하여 분산을 높였다.
 
 sklearn의 MLP Regressor을 이용하여 모델을 만들었다.
-
-평가산식은 NMAE(Normal MAE)였으며,
-0.15121을 받아 112/648의 순위를 기록하였다.
